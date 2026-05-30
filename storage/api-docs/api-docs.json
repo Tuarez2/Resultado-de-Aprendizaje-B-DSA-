@@ -1,0 +1,509 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "API Resultado de Aprendizaje B - DSA",
+        "description": "Documentación de la API de gestión académica, incluyendo el CRUD de docentes.",
+        "contact": {
+            "email": "leonardo.velez@email.com"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://127.0.0.1:8000",
+            "description": "Servidor Local de Desarrollo"
+        }
+    ],
+    "paths": {
+        "/api/docentes": {
+            "get": {
+                "tags": [
+                    "Docentes"
+                ],
+                "summary": "Obtener lista de docentes",
+                "description": "Retorna una lista con todos los docentes registrados, con soporte para búsqueda mediante el parámetro 'q'.",
+                "operationId": "getDocentesList",
+                "parameters": [
+                    {
+                        "name": "q",
+                        "in": "query",
+                        "description": "Término de búsqueda opcional (nombre, apellido, especialidad, correo o teléfono)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operación exitosa",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "integer",
+                                            "example": 200
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "OK"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Docente"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Docentes"
+                ],
+                "summary": "Crear un nuevo docente",
+                "description": "Valida y crea un docente en la base de datos.",
+                "operationId": "storeDocente",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "nombres",
+                                    "apellidos",
+                                    "especialidad",
+                                    "correo",
+                                    "telefono"
+                                ],
+                                "properties": {
+                                    "nombres": {
+                                        "type": "string",
+                                        "example": "Leonardo"
+                                    },
+                                    "apellidos": {
+                                        "type": "string",
+                                        "example": "Velez"
+                                    },
+                                    "especialidad": {
+                                        "type": "string",
+                                        "example": "Base de datos"
+                                    },
+                                    "correo": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "leonardo.velez@email.com"
+                                    },
+                                    "telefono": {
+                                        "type": "string",
+                                        "example": "0999999999"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Docente creado exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "integer",
+                                            "example": 201
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Docente creado correctamente"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Docente"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Datos inválidos / Errores de validación",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 422
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Los datos proporcionados no son válidos."
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Conflicto / Correo duplicado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "integer",
+                                            "example": 409
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Conflicto: ya existe un registro con esos datos"
+                                        },
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/docentes/{id}": {
+            "get": {
+                "tags": [
+                    "Docentes"
+                ],
+                "summary": "Obtener detalle de un docente",
+                "description": "Retorna la información detallada de un docente específico por su ID.",
+                "operationId": "getDocenteById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID del docente",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operación exitosa",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "integer",
+                                            "example": 200
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "OK"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Docente"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Docente no encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 404
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Recurso no encontrado."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Docentes"
+                ],
+                "summary": "Actualizar un docente existente",
+                "description": "Valida y actualiza los campos de un docente específico por su ID.",
+                "operationId": "updateDocente",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID del docente",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "nombres": {
+                                        "type": "string",
+                                        "example": "Leonardo"
+                                    },
+                                    "apellidos": {
+                                        "type": "string",
+                                        "example": "Velez"
+                                    },
+                                    "especialidad": {
+                                        "type": "string",
+                                        "example": "Inteligencia Artificial"
+                                    },
+                                    "correo": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "leonardo.velez@email.com"
+                                    },
+                                    "telefono": {
+                                        "type": "string",
+                                        "example": "0888888888"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Docente actualizado exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "integer",
+                                            "example": 200
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Docente actualizado correctamente"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Docente"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Docente no encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 404
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Recurso no encontrado."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Datos inválidos / Errores de validación",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 422
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Los datos proporcionados no son válidos."
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Docentes"
+                ],
+                "summary": "Eliminar un docente",
+                "description": "Elimina el registro de un docente específico de la base de datos.",
+                "operationId": "deleteDocente",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID del docente",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Docente eliminado exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "integer",
+                                            "example": 200
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Docente eliminado correctamente"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Docente no encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 404
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Recurso no encontrado."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Docente": {
+                "title": "Docente",
+                "description": "Modelo de Docente",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "readOnly": true,
+                        "example": 1
+                    },
+                    "nombres": {
+                        "type": "string",
+                        "example": "Leonardo"
+                    },
+                    "apellidos": {
+                        "type": "string",
+                        "example": "Velez"
+                    },
+                    "especialidad": {
+                        "type": "string",
+                        "example": "Base de datos"
+                    },
+                    "correo": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "leonardo.velez@email.com"
+                    },
+                    "telefono": {
+                        "type": "string",
+                        "example": "0999999999"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "example": "2026-05-29T23:25:04.000000Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "example": "2026-05-29T23:26:50.000000Z"
+                    }
+                },
+                "type": "object"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Docentes",
+            "description": "Docentes"
+        }
+    ]
+}
