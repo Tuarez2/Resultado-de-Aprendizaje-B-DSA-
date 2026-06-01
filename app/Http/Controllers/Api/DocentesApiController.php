@@ -71,23 +71,26 @@ class DocentesApiController extends Controller
     )]
     public function index(Request $request): JsonResponse
     {
+        $request->validate([
+            'q' => 'nullable|string|min:1|max:100'
+        ]);
+
         $query = Docentes::query();
 
         if ($search = $request->query('q')) {
-            $query->where('nombres',      'like', "%{$search}%")
-                  ->orWhere('apellidos',    'like', "%{$search}%")
-                  ->orWhere('especialidad', 'like', "%{$search}%")
-                  ->orWhere('correo',       'like', "%{$search}%")
-                  ->orWhere('telefono',     'like', "%{$search}%");
+            $query->where('nombres', 'like', "%{$search}%")
+                ->orWhere('apellidos', 'like', "%{$search}%")
+                ->orWhere('especialidad', 'like', "%{$search}%")
+                ->orWhere('correo', 'like', "%{$search}%")
+                ->orWhere('telefono', 'like', "%{$search}%");
         }
 
         return response()->json([
-            'status'  => 200,
+            'status' => 200,
             'message' => 'OK',
-            'data'    => $query->get(),
+            'data' => $query->get(),
         ], 200);
     }
-
     #[OA\Post(
         path: "/api/docentes",
         operationId: "storeDocente",
@@ -147,31 +150,61 @@ class DocentesApiController extends Controller
     public function store(Request $request): JsonResponse
     {
         $data = $request->validate([
-            'nombres'      => 'required|string|max:255',
-            'apellidos'    => 'required|string|max:255',
-            'especialidad' => 'required|string|max:255',
-            'correo'       => 'required|email|unique:docentes,correo',
-            'telefono'     => 'required|string|max:50',
+            'nombres' => [
+                'required', 'string', 'min:3', 'max:100', 'regex:/^[\pL\s]+$/u'
+            ],
+
+            'apellidos' => [
+                'required', 'string', 'min:3', 'max:100', 'regex:/^[\pL\s]+$/u'
+            ],
+
+            'especialidad' => [
+                'required', 'string', 'min:3', 'max:100'
+            ],
+
+            'correo' => [
+                'required', 'email', 'max:255', 'unique:docentes,correo'
+            ],
+
+            'telefono' => [
+                'required', 'digits:10'
+            ],
+        ], [
+            'nombres.required' => 'El nombre es obligatorio.',
+            'nombres.min' => 'El nombre debe tener al menos 3 caracteres.',
+            'nombres.regex' => 'El nombre solo puede contener letras y espacios.',
+
+            'apellidos.required' => 'El apellido es obligatorio.',
+            'apellidos.min' => 'El apellido debe tener al menos 3 caracteres.',
+            'apellidos.regex' => 'El apellido solo puede contener letras y espacios.',
+
+            'especialidad.required' => 'La especialidad es obligatoria.',
+            'especialidad.min' => 'La especialidad debe tener al menos 3 caracteres.',
+
+            'correo.required' => 'El correo es obligatorio.',
+            'correo.email' => 'Debe ingresar un correo válido.',
+            'correo.unique' => 'Este correo ya está registrado.',
+
+            'telefono.required' => 'El teléfono es obligatorio.',
+            'telefono.digits' => 'El teléfono debe contener exactamente 10 dígitos.'
         ]);
 
         try {
             $docente = Docentes::create($data);
 
             return response()->json([
-                'status'  => 201,
+                'status' => 201,
                 'message' => 'Docente creado correctamente',
-                'data'    => $docente,
+                'data' => $docente,
             ], 201);
 
         } catch (QueryException $e) {
             return response()->json([
-                'status'  => 409,
-                'message' => 'Conflicto: ya existe un registro con esos datos',
-                'error'   => $e->getMessage(),
+                'status' => 409,
+                'message' => 'Conflicto: ya existe un registro con esos datos'
             ], 409);
         }
     }
-
     #[OA\Get(
         path: "/api/docentes/{id}",
         operationId: "getDocenteById",
@@ -288,22 +321,48 @@ class DocentesApiController extends Controller
     public function update(Request $request, Docentes $docente): JsonResponse
     {
         $data = $request->validate([
-            'nombres'      => 'sometimes|required|string|max:255',
-            'apellidos'    => 'sometimes|required|string|max:255',
-            'especialidad' => 'sometimes|required|string|max:255',
-            'correo'       => 'sometimes|required|email|unique:docentes,correo,' . $docente->id,
-            'telefono'     => 'sometimes|required|string|max:50',
+            'nombres' => [
+                'sometimes', 'required', 'string', 'min:3', 'max:100', 'regex:/^[\pL\s]+$/u'
+            ],
+
+            'apellidos' => [
+                'sometimes', 'required', 'string', 'min:3', 'max:100', 'regex:/^[\pL\s]+$/u'
+            ],
+
+            'especialidad' => [
+                'sometimes', 'required', 'string', 'min:3','max:100'
+            ],
+
+            'correo' => [
+                'sometimes', 'required', 'email', 'max:255', 'unique:docentes,correo,' . $docente->id
+            ],
+
+            'telefono' => [
+                'sometimes', 'required', 'digits:10'
+            ],
+        ], [
+            'nombres.min' => 'El nombre debe tener al menos 3 caracteres.',
+            'nombres.regex' => 'El nombre solo puede contener letras y espacios.',
+
+            'apellidos.min' => 'El apellido debe tener al menos 3 caracteres.',
+            'apellidos.regex' => 'El apellido solo puede contener letras y espacios.',
+
+            'especialidad.min' => 'La especialidad debe tener al menos 3 caracteres.',
+
+            'correo.email' => 'Debe ingresar un correo válido.',
+            'correo.unique' => 'Este correo ya está registrado.',
+
+            'telefono.digits' => 'El teléfono debe contener exactamente 10 dígitos.'
         ]);
 
         $docente->update($data);
 
         return response()->json([
-            'status'  => 200,
+            'status' => 200,
             'message' => 'Docente actualizado correctamente',
-            'data'    => $docente,
+            'data' => $docente,
         ], 200);
     }
-
     #[OA\Delete(
         path: "/api/docentes/{id}",
         operationId: "deleteDocente",
